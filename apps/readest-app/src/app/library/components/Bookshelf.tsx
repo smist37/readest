@@ -27,6 +27,7 @@ import {
   ensureLibraryGroupByType,
   expandBookshelfSelection,
   findSelectedManualGroup,
+  getSelectedUpNextBook,
   resolveCurrentShelfBooks,
   selectAbsOfflineBooks,
   selectDownloadableBooks,
@@ -201,6 +202,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
 
   const abortDeletionRef = useRef(false);
   const selectAllAppliedRef = useRef(false);
+  const selectNoneAppliedRef = useRef(false);
   const isImportingBook = useRef(false);
   const iconSize15 = useResponsiveSize(15);
   const autofocusRef = useAutoFocus<HTMLDivElement>();
@@ -708,6 +710,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
         // `isSelectAll` stays latched until select mode or navigation clears
         // it, so applying it again whenever the shelves recompute would undo
         // the user's manual unticks. Honour each request once.
+        selectNoneAppliedRef.current = false;
         if (!selectAllAppliedRef.current) {
           selectAllAppliedRef.current = true;
           setSelectedBooks(currentShelfBooks.map((book) => book.hash));
@@ -716,10 +719,18 @@ const Bookshelf: React.FC<BookshelfProps> = ({
       }
       selectAllAppliedRef.current = false;
       if (isSelectNone) {
-        setSelectedBooks([]);
+        // Latched the same way: books picked afterwards stay picked when the
+        // shelves recompute (e.g. after reordering Up Next).
+        if (!selectNoneAppliedRef.current) {
+          selectNoneAppliedRef.current = true;
+          setSelectedBooks([]);
+        }
+        return;
       }
+      selectNoneAppliedRef.current = false;
     } else {
       selectAllAppliedRef.current = false;
+      selectNoneAppliedRef.current = false;
       setSelectedBooks([]);
       setShowSelectModeActions(false);
     }
@@ -807,6 +818,10 @@ const Bookshelf: React.FC<BookshelfProps> = ({
     isSelectMode && isTauriAppPlatform()
       ? selectAbsOfflineBooks(selectedBooks, sortedBookshelfItems, filteredBooks)
       : [];
+  // Reordering keeps the selection, so Move Up can be tapped again and again.
+  const selectedUpNextBook = isSelectMode
+    ? getSelectedUpNextBook(selectedBooks, filteredBooks)
+    : undefined;
 
   const downloadSelectedBooks = async () => {
     const books = downloadableBooks;
@@ -1045,6 +1060,9 @@ const Bookshelf: React.FC<BookshelfProps> = ({
           onTag={tagSelectedBooks}
           onDetails={openBookDetails}
           onStatus={showStatusSelection}
+          onMoveUpNext={
+            selectedUpNextBook ? (move) => handleMoveUpNext(selectedUpNextBook, move) : undefined
+          }
           onDownload={downloadSelectedBooks}
           onSend={sendSelectedBook}
           onDelete={deleteSelectedBooks}

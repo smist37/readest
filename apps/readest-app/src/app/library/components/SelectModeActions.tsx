@@ -9,12 +9,16 @@ import {
   MdOutlineCloudDownload,
   MdWifiTethering,
   MdLabelOutline,
+  MdVerticalAlignTop,
+  MdArrowUpward,
+  MdArrowDownward,
 } from 'react-icons/md';
 import { IoShareSocialOutline } from 'react-icons/io5';
 import { LuFolderPlus } from 'react-icons/lu';
 import { useKeyDownActions } from '@/hooks/useKeyDownActions';
 import { useTranslation } from '@/hooks/useTranslation';
 import { isMd5 } from '@/utils/md5';
+import type { UpNextMove } from '../utils/libraryUtils';
 
 interface SelectModeActionsProps {
   selectedBooks: string[];
@@ -33,6 +37,10 @@ interface SelectModeActionsProps {
   onTag: () => void;
   onDetails: () => void;
   onStatus: () => void;
+  // Set only when the selection is a single Up Next book: the touch-screen way
+  // to reorder the queue, since long-press selects instead of opening the
+  // context menu.
+  onMoveUpNext?: (move: UpNextMove) => void;
   // Queues every cloud-only book in the selection, groups included (#5244).
   onDownload: () => void;
   // The macOS / iPad share popover is anchored to the selected book's
@@ -63,6 +71,7 @@ const SelectModeActions: React.FC<SelectModeActionsProps> = ({
   onTag,
   onDetails,
   onStatus,
+  onMoveUpNext,
   onDownload,
   onSend,
   sendNearbyEnabled = false,
@@ -77,6 +86,11 @@ const SelectModeActions: React.FC<SelectModeActionsProps> = ({
   const hasValidBooks = selectedBooks.every((id) => isMd5(id));
   const hasSingleSelection = selectedBooks.length === 1;
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const upNextMoves = [
+    { move: 'top' as const, label: _('Move to Top'), Icon: MdVerticalAlignTop },
+    { move: 'up' as const, label: _('Move Up'), Icon: MdArrowUpward },
+    { move: 'down' as const, label: _('Move Down'), Icon: MdArrowDownward },
+  ];
   useKeyDownActions({ onCancel, elementRef: rootRef });
 
   useEffect(() => {
@@ -154,6 +168,19 @@ const SelectModeActions: React.FC<SelectModeActionsProps> = ({
           <MdCheckCircleOutline />
           <div>{_('Status')}</div>
         </button>
+        {onMoveUpNext &&
+          upNextMoves.map(({ move, label, Icon }) => (
+            <button
+              key={move}
+              onClick={() => onMoveUpNext(move)}
+              aria-label={label}
+              title={label}
+              className='flex flex-col items-center justify-center gap-1'
+            >
+              <Icon />
+              <div className='text-center max-[500px]:sr-only'>{label}</div>
+            </button>
+          ))}
         <button
           onClick={onDetails}
           className={clsx(

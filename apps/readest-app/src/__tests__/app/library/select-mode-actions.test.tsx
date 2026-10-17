@@ -153,3 +153,28 @@ describe('SelectModeActions download', () => {
     ]);
   });
 });
+
+describe('SelectModeActions Up Next reorder', () => {
+  const moveLabels = ['Move to Top', 'Move Up', 'Move Down'];
+
+  it('shows the reorder actions when a single Up Next book is selected', () => {
+    const onMoveUpNext = vi.fn();
+    render(<SelectModeActions {...baseProps} onMoveUpNext={onMoveUpNext} />);
+
+    for (const label of moveLabels) {
+      expect(screen.getByRole('button', { name: label })).toBeTruthy();
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Move to Top' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Move Up' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Move Down' }));
+    expect(onMoveUpNext.mock.calls).toEqual([['top'], ['up'], ['down']]);
+  });
+
+  it('hides the reorder actions otherwise', () => {
+    render(<SelectModeActions {...baseProps} />);
+
+    for (const label of moveLabels) {
+      expect(screen.queryByRole('button', { name: label })).toBeNull();
+    }
+  });
+});

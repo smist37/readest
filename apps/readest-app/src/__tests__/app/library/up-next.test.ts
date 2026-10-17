@@ -3,6 +3,7 @@ import {
   createBookSorter,
   getBookContextMenuItemIds,
   getDisplayedTimeRemaining,
+  getSelectedUpNextBook,
   moveInUpNextQueue,
   pickFresherUpNextOrder,
   withMissingSortValuesLast,
@@ -178,5 +179,32 @@ describe('Up Next status', () => {
     book.progress = [10, 100];
     expect(isCurrentlyReadingBook(book)).toBe(false);
     expect(getDisplayedTimeRemaining(book, 60)).toBeUndefined();
+  });
+});
+
+// Mobile web has no context menu: long-press enters select mode, so the
+// select-mode bar carries the reorder actions for a single queued book.
+describe('getSelectedUpNextBook', () => {
+  const books = [
+    queued('a', 0),
+    queued('b', 1),
+    createBook({ hash: 'c', readingStatus: 'reading' }),
+  ];
+
+  it('returns the book when exactly one Up Next book is selected', () => {
+    expect(getSelectedUpNextBook(['b'], books)?.hash).toBe('b');
+  });
+
+  it('returns nothing for two selected books, even if both are queued', () => {
+    expect(getSelectedUpNextBook(['a', 'b'], books)).toBeUndefined();
+  });
+
+  it('returns nothing for a single book that is not Up Next', () => {
+    expect(getSelectedUpNextBook(['c'], books)).toBeUndefined();
+  });
+
+  it('returns nothing without a selection or for a selected group', () => {
+    expect(getSelectedUpNextBook([], books)).toBeUndefined();
+    expect(getSelectedUpNextBook(['group-id'], books)).toBeUndefined();
   });
 });

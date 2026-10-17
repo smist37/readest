@@ -556,6 +556,19 @@ describe('library bookshelf integration', () => {
     rerender(<Bookshelf {...props} isSelectAll />);
     await waitFor(() => expect(useLibraryStore.getState().selectedBooks.size).toBe(20));
   });
+  it('keeps a book picked after Deselect all while the shelves recompute', async () => {
+    // Reordering an Up Next book from the select-mode bar updates the library;
+    // the book must stay selected so Move Up can be tapped again.
+    const { rerender } = render(<Bookshelf {...props} isSelectNone />);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Book 3' })[0]!);
+    expect(useLibraryStore.getState().selectedBooks).toEqual(new Set(['3']));
+    rerender(<Bookshelf {...props} isSelectNone libraryBooks={[...books]} />);
+    expect(useLibraryStore.getState().selectedBooks).toEqual(new Set(['3']));
+    rerender(<Bookshelf {...props} isSelectAll />);
+    await waitFor(() => expect(useLibraryStore.getState().selectedBooks.size).toBe(20));
+    rerender(<Bookshelf {...props} isSelectNone />);
+    await waitFor(() => expect(useLibraryStore.getState().selectedBooks.size).toBe(0));
+  });
   it('badges series indexes only on books inside an opened series group (#6347)', () => {
     const seriesBooks = books.map((book, index) => ({
       ...book,

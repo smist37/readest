@@ -1151,6 +1151,17 @@ export const moveInUpNextQueue = (
   );
 };
 
+/**
+ * The book the select-mode bar can reorder: the selection is exactly one book
+ * and it is Up Next. Long-press selects on touch screens, where there is no
+ * context menu to reach "Move Up" from.
+ */
+export const getSelectedUpNextBook = (selectedIds: string[], books: Book[]): Book | undefined => {
+  if (selectedIds.length !== 1) return undefined;
+  const book = books.find((b) => b.hash === selectedIds[0]);
+  return book?.readingStatus === 'upnext' ? book : undefined;
+};
+
 type UpNextOrderFields = Pick<Book, 'upNextOrder' | 'upNextOrderUpdatedAt'>;
 
 /**
