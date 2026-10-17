@@ -2541,5 +2541,11 @@
   "{{count}} voices available_other": "སྒྲ་གདངས་ {{count}} ཡོད།",
   "Multilingual": "སྐད་རིགས་མང་པོ།",
   "Expressive": "མྱོང་ཚོར་ལྡན་པ།",
-  "Show Page Thumbnails": "ཤོག་ངོས་ཀྱི་པར་ཆུང་སྟོན།"
+  "Show Page Thumbnails": "ཤོག་ངོས་ཀྱི་པར་ཆུང་སྟོན།",
+  "Up Next": "རྗེས་མ།",
+  "Mark as Up Next": "རྗེས་མར་རྟགས་རྒྱག",
+  "Move to Top": "ཡང་རྩེར་སྤོ།",
+  "Move Up": "ཡར་སྤོ།",
+  "Move Down": "མར་སྤོ།",
+  "Up Next Order": "རྗེས་མའི་གོ་རིམ།"
 }

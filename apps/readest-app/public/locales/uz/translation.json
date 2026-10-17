@@ -2606,5 +2606,11 @@
   "{{count}} voices available_other": "{{count}} ta ovoz mavjud",
   "Multilingual": "Koʻp tilli",
   "Expressive": "Ifodali",
-  "Show Page Thumbnails": "Sahifa eskizlarini ko'rsatish"
+  "Show Page Thumbnails": "Sahifa eskizlarini ko'rsatish",
+  "Up Next": "Navbatdagi",
+  "Mark as Up Next": "Navbatdagi deb belgilash",
+  "Move to Top": "Eng tepaga ko‘chirish",
+  "Move Up": "Yuqoriga ko‘chirish",
+  "Move Down": "Pastga ko‘chirish",
+  "Up Next Order": "Navbat tartibi"
 }

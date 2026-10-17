@@ -2671,5 +2671,11 @@
   "{{count}} voices available_other": "{{count}} de voci disponibile",
   "Multilingual": "Multilingv",
   "Expressive": "Expresiv",
-  "Show Page Thumbnails": "Afișează miniaturile paginilor"
+  "Show Page Thumbnails": "Afișează miniaturile paginilor",
+  "Up Next": "Urmează",
+  "Mark as Up Next": "Marcați ca urmează",
+  "Move to Top": "Mutați în vârf",
+  "Move Up": "Mutați în sus",
+  "Move Down": "Mutați în jos",
+  "Up Next Order": "Ordinea Urmează"
 }

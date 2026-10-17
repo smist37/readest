@@ -2541,5 +2541,11 @@
   "{{count}} voices available_other": "{{count}} suara tersedia",
   "Multilingual": "Pelbagai bahasa",
   "Expressive": "Ekspresif",
-  "Show Page Thumbnails": "Tunjukkan Lakaran Kecil Halaman"
+  "Show Page Thumbnails": "Tunjukkan Lakaran Kecil Halaman",
+  "Up Next": "Seterusnya",
+  "Mark as Up Next": "Tandakan sebagai Seterusnya",
+  "Move to Top": "Alih ke atas sekali",
+  "Move Up": "Alih ke atas",
+  "Move Down": "Alih ke bawah",
+  "Up Next Order": "Susunan Seterusnya"
 }

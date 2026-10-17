@@ -129,6 +129,7 @@ describe('library context menu on Linux desktop (issue #5360)', () => {
       'Select Book',
       'Group Books',
       'Mark as Finished',
+      'Mark as Up Next',
       'Mark as On hold',
       'Show Book Details',
       'Reveal in Folder',

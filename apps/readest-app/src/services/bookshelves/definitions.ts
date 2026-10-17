@@ -62,6 +62,7 @@ export const BOOKSHELF_SORT_LABELS: Record<LibrarySortByType, string> = {
   published: _('Date Published'),
   progress: _('Progress Read'),
   timeRemaining: _('Time Remaining'),
+  upNext: _('Up Next Order'),
 };
 export const BOOKSHELF_GROUP_LABELS: Record<LibraryGroupByType, string> = {
   author: _('Authors'),

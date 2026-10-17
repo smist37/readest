@@ -461,6 +461,24 @@ describe('shouldApplyRemoteBookMetadata', () => {
   });
 });
 
+describe('Up Next order clock', () => {
+  test('a reorder-only change is applied and wins on its own clock', () => {
+    const local = { updatedAt: 20, upNextOrder: 5, upNextOrderUpdatedAt: 1 } as Book;
+    const remote = { updatedAt: 10, upNextOrder: 0, upNextOrderUpdatedAt: 30 } as Book;
+    expect(shouldApplyRemoteBookMetadata(local, remote)).toBe(true);
+    const merged = mergeBookMetadata(local, remote);
+    expect(merged.upNextOrder).toBe(0);
+    expect(merged.upNextOrderUpdatedAt).toBe(30);
+    expect(merged.updatedAt).toBe(20);
+  });
+
+  test('an older remote position does not overwrite the local one', () => {
+    const local = { updatedAt: 1, upNextOrder: 5, upNextOrderUpdatedAt: 30 } as Book;
+    const remote = { updatedAt: 9, upNextOrder: 0, upNextOrderUpdatedAt: 10 } as Book;
+    expect(mergeBookMetadata(local, remote).upNextOrder).toBe(5);
+  });
+});
+
 describe('isRemoteBookMetadataNewer', () => {
   test('strictly newer remote only', () => {
     expect(isRemoteBookMetadataNewer({ updatedAt: 1 } as Book, { updatedAt: 2 } as Book)).toBe(

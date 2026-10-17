@@ -80,6 +80,8 @@ export const transformBookToDB = (book: unknown, userId: string): DBBook => {
     progress,
     readingStatus,
     readingStatusUpdatedAt,
+    upNextOrder,
+    upNextOrderUpdatedAt,
     coverHash,
     coverUpdatedAt,
     pageCount,
@@ -106,6 +108,10 @@ export const transformBookToDB = (book: unknown, userId: string): DBBook => {
     reading_status: readingStatus,
     reading_status_updated_at: readingStatusUpdatedAt
       ? new Date(readingStatusUpdatedAt).toISOString()
+      : null,
+    up_next_order: upNextOrder ?? null,
+    up_next_order_updated_at: upNextOrderUpdatedAt
+      ? new Date(upNextOrderUpdatedAt).toISOString()
       : null,
     cover_hash: coverHash ?? null,
     cover_updated_at: coverUpdatedAt ? new Date(coverUpdatedAt).toISOString() : null,
@@ -134,6 +140,8 @@ export const transformBookFromDB = (dbBook: DBBook): Book => {
     progress,
     reading_status,
     reading_status_updated_at,
+    up_next_order,
+    up_next_order_updated_at,
     cover_hash,
     cover_updated_at,
     page_count,
@@ -161,6 +169,10 @@ export const transformBookFromDB = (dbBook: DBBook): Book => {
     readingStatusUpdatedAt: reading_status_updated_at
       ? new Date(reading_status_updated_at).getTime()
       : undefined,
+    upNextOrder: up_next_order ?? null,
+    upNextOrderUpdatedAt: up_next_order_updated_at
+      ? new Date(up_next_order_updated_at).getTime()
+      : null,
     coverHash: cover_hash ?? null,
     coverUpdatedAt: cover_updated_at ? new Date(cover_updated_at).getTime() : null,
     sourceTitle: source_title,

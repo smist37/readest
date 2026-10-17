@@ -103,6 +103,24 @@ export function resolveCoverMerge(
 }
 
 /**
+ * Field-level last-writer-wins for a books row's Up Next position, by its own
+ * up_next_order_updated_at (ties → client). NULL timestamp = epoch 0. A reorder
+ * stamps only this clock, so it must not ride the row's updated_at — mirrors
+ * the reading_status merge (#4634).
+ */
+export function resolveUpNextOrderMerge(
+  client: Pick<DBBook, 'up_next_order' | 'up_next_order_updated_at'>,
+  server: Pick<DBBook, 'up_next_order' | 'up_next_order_updated_at'>,
+): Pick<DBBook, 'up_next_order' | 'up_next_order_updated_at'> {
+  const winner =
+    ms(client.up_next_order_updated_at) >= ms(server.up_next_order_updated_at) ? client : server;
+  return {
+    up_next_order: winner.up_next_order ?? null,
+    up_next_order_updated_at: winner.up_next_order_updated_at ?? null,
+  };
+}
+
+/**
  * A books row's page count, counted from the file at import (#6662): the row
  * winner's value, else the other side's. Old clients, the KOReader and Calibre
  * plugins, and devices that never counted the book push no page_count, so a
@@ -763,6 +781,8 @@ export async function POST(req: NextRequest) {
                   DBBook,
                   | 'reading_status'
                   | 'reading_status_updated_at'
+                  | 'up_next_order'
+                  | 'up_next_order_updated_at'
                   | 'cover_hash'
                   | 'cover_updated_at'
                   | 'metadata'
@@ -775,6 +795,8 @@ export async function POST(req: NextRequest) {
               > &
               Pick<DBBook, 'title' | 'author' | 'tags'>;
             const status = resolveReadingStatusMerge(clientBook, serverBook);
+            // The Up Next position merges on its own clock, like the status.
+            const upNext = resolveUpNextOrderMerge(clientBook, serverBook);
             // Cover has its own field-level LWW so a page-turn can't clobber a
             // cover edit (issue #4544; mirrors reading_status / #4634).
             const cover = resolveCoverMerge(clientBook, serverBook);
@@ -789,6 +811,8 @@ export async function POST(req: NextRequest) {
               // the row is older).
               clientBook.reading_status = status.reading_status;
               clientBook.reading_status_updated_at = status.reading_status_updated_at;
+              clientBook.up_next_order = upNext.up_next_order;
+              clientBook.up_next_order_updated_at = upNext.up_next_order_updated_at;
               clientBook.cover_hash = cover.cover_hash;
               clientBook.cover_updated_at = cover.cover_updated_at;
               clientBook.title = meta.title;
@@ -813,8 +837,10 @@ export async function POST(req: NextRequest) {
               const metadataChanged = bookMetadataChanged(meta, serverBook);
               const groupChanged = bookGroupChanged(group, serverBook);
               const pageCountChanged = pageCount !== (serverBook.page_count ?? null);
+              const upNextChanged = upNext.up_next_order !== (serverBook.up_next_order ?? null);
               if (
                 statusChanged ||
+                upNextChanged ||
                 coverChanged ||
                 metadataChanged ||
                 groupChanged ||
@@ -833,6 +859,8 @@ export async function POST(req: NextRequest) {
                   serverBook as unknown as DBBook,
                   status,
                 );
+                propagated.up_next_order = upNext.up_next_order;
+                propagated.up_next_order_updated_at = upNext.up_next_order_updated_at;
                 propagated.cover_hash = cover.cover_hash;
                 propagated.cover_updated_at = cover.cover_updated_at;
                 propagated.title = meta.title;

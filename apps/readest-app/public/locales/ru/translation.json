@@ -2736,5 +2736,11 @@
   "{{count}} voices available_other": "Доступно {{count}} голоса",
   "Multilingual": "Многоязычный",
   "Expressive": "Выразительный",
-  "Show Page Thumbnails": "Показывать миниатюры страниц"
+  "Show Page Thumbnails": "Показывать миниатюры страниц",
+  "Up Next": "Далее",
+  "Mark as Up Next": "Отметить как следующее",
+  "Move to Top": "Переместить в начало",
+  "Move Up": "Переместить вверх",
+  "Move Down": "Переместить вниз",
+  "Up Next Order": "Порядок очереди"
 }

@@ -495,3 +495,30 @@ describe('areBooksOpen', () => {
     expect(useReaderStore.getState().areBooksOpen([])).toBe(false);
   });
 });
+
+describe('setProgress reading status', () => {
+  const progressFor = (readingStatus: string | undefined) => {
+    const key = 'statusbook-1';
+    seedViewState(key);
+    useBookDataStore.setState({
+      booksData: { statusbook: { isFixedLayout: false, config: {} } as unknown as BookData },
+    });
+    const { getBookByHash, updateBookProgress } = useLibraryStore.getState();
+    vi.mocked(getBookByHash).mockReturnValue({ hash: 'statusbook', readingStatus } as never);
+    vi.mocked(updateBookProgress).mockClear();
+    const page = { current: 10, total: 100 };
+    useReaderStore
+      .getState()
+      .setProgress(key, 'cfi', {} as never, undefined, page, page, {} as never, {} as never, 0.1);
+    return vi.mocked(updateBookProgress).mock.calls[0];
+  };
+
+  test('clears Up Next once reading starts, the way it clears Unread', () => {
+    expect(progressFor('upnext')).toEqual(['statusbook', [11, 100], undefined]);
+    expect(progressFor('unread')).toEqual(['statusbook', [11, 100], undefined]);
+  });
+
+  test('keeps On hold', () => {
+    expect(progressFor('abandoned')).toEqual(['statusbook', [11, 100], 'abandoned']);
+  });
+});

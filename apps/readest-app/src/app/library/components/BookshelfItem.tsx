@@ -19,6 +19,7 @@ import { Book, BooksGroup, ReadingStatus } from '@/types/book';
 import {
   getBookContextMenuItemIds,
   type BookContextMenuItemId,
+  type UpNextMove,
 } from '@/app/library/utils/libraryUtils';
 import { isTauriAppPlatform } from '@/services/environment';
 import { isLocalSendEnabled } from '@/services/localsend/devicePrefs';
@@ -103,6 +104,7 @@ interface BookshelfItemProps {
   handleShowDetailsBook: (book: Book) => void;
   handleLibraryNavigation: (targetGroup: string) => void;
   handleUpdateReadingStatus: (book: Book, status: ReadingStatus | undefined) => void;
+  handleMoveUpNext?: (book: Book, move: UpNextMove) => void;
   showTimeRemaining: boolean;
   showSeriesIndex?: boolean;
 }
@@ -124,6 +126,7 @@ const BookshelfItem: React.FC<BookshelfItemProps> = ({
   handleShowDetailsBook,
   handleLibraryNavigation,
   handleUpdateReadingStatus,
+  handleMoveUpNext,
   showTimeRemaining,
   showSeriesIndex,
 }) => {
@@ -198,6 +201,12 @@ const BookshelfItem: React.FC<BookshelfItemProps> = ({
           handleUpdateReadingStatus(book, 'unread');
         },
       },
+      markUpNext: {
+        text: _('Mark as Up Next'),
+        action: async () => {
+          handleUpdateReadingStatus(book, 'upnext');
+        },
+      },
       markAbandoned: {
         text: _('Mark as On hold'),
         action: async () => {
@@ -208,6 +217,24 @@ const BookshelfItem: React.FC<BookshelfItemProps> = ({
         text: _('Clear Status'),
         action: async () => {
           handleUpdateReadingStatus(book, undefined);
+        },
+      },
+      moveUpNextToTop: {
+        text: _('Move to Top'),
+        action: async () => {
+          handleMoveUpNext?.(book, 'top');
+        },
+      },
+      moveUpNextUp: {
+        text: _('Move Up'),
+        action: async () => {
+          handleMoveUpNext?.(book, 'up');
+        },
+      },
+      moveUpNextDown: {
+        text: _('Move Down'),
+        action: async () => {
+          handleMoveUpNext?.(book, 'down');
         },
       },
       showDetails: {

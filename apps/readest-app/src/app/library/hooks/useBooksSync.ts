@@ -21,6 +21,7 @@ import { fetchAbsBookCover } from '@/services/audiobookshelf/librarySync';
 import { runFileLibrarySyncPass } from '@/services/sync/file/runLibrarySync';
 import {
   pickFresherReadingStatus,
+  pickFresherUpNextOrder,
   needsCoverRefresh,
   pickFresherCover,
   pickFresherMetadata,
@@ -260,6 +261,9 @@ export const useBooksSync = () => {
         const status = pickFresherReadingStatus(oldBook, matchingBook);
         mergedBook.readingStatus = status.readingStatus;
         mergedBook.readingStatusUpdatedAt = status.readingStatusUpdatedAt;
+        const upNext = pickFresherUpNextOrder(oldBook, matchingBook);
+        mergedBook.upNextOrder = upNext.upNextOrder;
+        mergedBook.upNextOrderUpdatedAt = upNext.upNextOrderUpdatedAt;
         // Cover is likewise resolved by its own coverUpdatedAt, independent of
         // the row's updatedAt — issue #4544.
         const cover = pickFresherCover(oldBook, matchingBook);

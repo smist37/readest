@@ -2606,5 +2606,11 @@
   "{{count}} voices available_other": "{{count}}টি ভয়েস উপলব্ধ",
   "Multilingual": "বহুভাষিক",
   "Expressive": "অভিব্যক্তিপূর্ণ",
-  "Show Page Thumbnails": "পৃষ্ঠার থাম্বনেইল দেখান"
+  "Show Page Thumbnails": "পৃষ্ঠার থাম্বনেইল দেখান",
+  "Up Next": "পরবর্তী",
+  "Mark as Up Next": "পরবর্তী হিসেবে চিহ্নিত করুন",
+  "Move to Top": "শীর্ষে সরান",
+  "Move Up": "উপরে সরান",
+  "Move Down": "নিচে সরান",
+  "Up Next Order": "পরবর্তী ক্রম"
 }

@@ -356,6 +356,24 @@ describe('bookshelf evaluation', () => {
     expect(matchBookshelfFilter(pushed, tbr)).toBe(true);
     expect(matchBookshelfFilter(book('other'), tbr)).toBe(false);
   });
+  it('filters by the Up Next status, which is not currently reading', () => {
+    const progress: [number, number] = [5, 100];
+    const queued: Book = { ...book('queued'), readingStatus: 'upnext', progress };
+    const reading: Book = { ...book('reading'), progress };
+    const status = discoverBookshelfFields([]).find((f) => f.id === 'status')!;
+    expect(status.choices?.map((c) => c.value)).toContain('upnext');
+    const rule = (field: string, kind: 'text' | 'boolean', value: string | boolean) => ({
+      ...filter,
+      children: [{ type: 'rule' as const, field, kind, operator: 'equals' as const, value }],
+    });
+    const upNext = rule('status', 'text', 'upnext');
+    expect(matchBookshelfFilter(queued, upNext)).toBe(true);
+    expect(matchBookshelfFilter(reading, upNext)).toBe(false);
+    const currentlyReading = rule('currentlyReading', 'boolean', true);
+    expect(matchBookshelfFilter(queued, currentlyReading)).toBe(false);
+    expect(matchBookshelfFilter(reading, currentlyReading)).toBe(true);
+  });
+
   it('filters by download status: local only, downloaded, or cloud only', () => {
     const books = [
       { ...book('local'), downloadedAt: 1 },

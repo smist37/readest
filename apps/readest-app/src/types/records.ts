@@ -14,6 +14,8 @@ export interface DBBook {
   progress?: [number, number] | null;
   reading_status?: string;
   reading_status_updated_at?: string | null;
+  up_next_order?: number | null;
+  up_next_order_updated_at?: string | null;
   cover_hash?: string | null;
   cover_updated_at?: string | null;
   page_count?: number | null;

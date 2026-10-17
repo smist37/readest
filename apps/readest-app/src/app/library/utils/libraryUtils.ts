@@ -38,6 +38,7 @@ const READING_STATUS_LABELS: Record<ReadingStatus, string> = {
   reading: _('Reading'),
   finished: _('Finished'),
   abandoned: _('On hold'),
+  upnext: _('Up Next'),
 };
 
 /**
@@ -396,7 +397,12 @@ export const getDisplayedTimeRemaining = (
   medianPageDurationSecs?: number,
 ): number | undefined => {
   const { readingStatus } = book;
-  if (readingStatus === 'finished' || readingStatus === 'abandoned' || readingStatus === 'unread') {
+  if (
+    readingStatus === 'finished' ||
+    readingStatus === 'abandoned' ||
+    readingStatus === 'unread' ||
+    readingStatus === 'upnext'
+  ) {
     return undefined;
   }
   return getTimeRemainingMinutes(book, medianPageDurationSecs);
@@ -422,21 +428,44 @@ export const formatTimeLeft = (totalMinutes: number, _: TranslationFunc): string
 const getShelfItemTimeRemaining = (item: Book | BooksGroup): number | undefined =>
   'books' in item ? undefined : getDisplayedTimeRemaining(item);
 
+/** A book's place in the Up Next queue, or undefined when it is not queued. */
+export const getUpNextOrder = (book: Book): number | undefined =>
+  book.readingStatus === 'upnext' ? (book.upNextOrder ?? undefined) : undefined;
+
+const getGroupUpNextOrder = (group: BooksGroup): number | undefined => {
+  const orders = group.books.map(getUpNextOrder).filter((o): o is number => o !== undefined);
+  return orders.length > 0 ? Math.min(...orders) : undefined;
+};
+
+const getShelfItemOptionalSortValue = (
+  item: Book | BooksGroup,
+  sortBy: LibrarySortByType,
+): number | undefined => {
+  if (sortBy === LibrarySortByType.TimeRemaining) return getShelfItemTimeRemaining(item);
+  return 'books' in item ? getGroupUpNextOrder(item) : getUpNextOrder(item);
+};
+
 /**
  * Wrap a comparator that has *already* had the sort direction applied, so items
- * with no remaining time always land after the ones that have it — ascending and
- * descending alike. "No time" is a bucket, not a value: it must sit outside the
- * sort-order multiplier, otherwise descending would float those items to the top.
+ * with no remaining time (or no Up Next position) always land after the ones that
+ * have it — ascending and descending alike. "No value" is a bucket, not a value:
+ * it must sit outside the sort-order multiplier, otherwise descending would float
+ * those items to the top.
  */
-export const withTimeRemainingLast =
+export const withMissingSortValuesLast =
   <T extends Book | BooksGroup>(sortBy: LibrarySortByType, compare: (a: T, b: T) => number) =>
   (a: T, b: T): number => {
-    if (sortBy !== LibrarySortByType.TimeRemaining) return compare(a, b);
-    const aTime = getShelfItemTimeRemaining(a);
-    const bTime = getShelfItemTimeRemaining(b);
-    if (aTime === undefined && bTime === undefined) return 0;
-    if (aTime === undefined) return 1;
-    if (bTime === undefined) return -1;
+    if (sortBy !== LibrarySortByType.TimeRemaining && sortBy !== LibrarySortByType.UpNext) {
+      return compare(a, b);
+    }
+    const aValue = getShelfItemOptionalSortValue(a, sortBy);
+    const bValue = getShelfItemOptionalSortValue(b, sortBy);
+    // Books outside the Up Next queue still follow the secondary sort.
+    if (aValue === undefined && bValue === undefined) {
+      return sortBy === LibrarySortByType.UpNext ? compare(a, b) : 0;
+    }
+    if (aValue === undefined) return 1;
+    if (bValue === undefined) return -1;
     return compare(a, b);
   };
 
@@ -522,6 +551,14 @@ const compareBookByKey = (
       if (aTime === undefined) return 1;
       if (bTime === undefined) return -1;
       return aTime - bTime;
+    }
+    case LibrarySortByType.UpNext: {
+      const aOrder = getUpNextOrder(a);
+      const bOrder = getUpNextOrder(b);
+      if (aOrder === undefined && bOrder === undefined) return 0;
+      if (aOrder === undefined) return 1;
+      if (bOrder === undefined) return -1;
+      return aOrder - bOrder;
     }
     default:
       return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
@@ -918,6 +955,9 @@ export const getBookSortValue = (book: Book, sortBy: LibrarySortByType): number 
       // Return Infinity if a book does not have time remaining (ie. if the book is unread or finished) so it is sorted after books with time remaining
       return getTimeRemainingMinutes(book) ?? Infinity;
 
+    case LibrarySortByType.UpNext:
+      return getUpNextOrder(book) ?? Infinity;
+
     default:
       return book.updatedAt;
   }
@@ -993,6 +1033,10 @@ export const getGroupSortValue = (
       // Return book with least amount of time remaining
       return Math.min(...books.map((b) => getTimeRemainingMinutes(b) ?? Infinity));
 
+    case LibrarySortByType.UpNext:
+      // The group's first place in the queue
+      return getGroupUpNextOrder(group) ?? Infinity;
+
     default:
       return Math.max(...books.map((b) => b.updatedAt));
   }
@@ -1040,7 +1084,11 @@ export type BookContextMenuItemId =
   | 'markFinished'
   | 'markUnread'
   | 'markAbandoned'
+  | 'markUpNext'
   | 'clearStatus'
+  | 'moveUpNextToTop'
+  | 'moveUpNextUp'
+  | 'moveUpNextDown'
   | 'showDetails'
   | 'showInFinder'
   | 'searchGoodreads'
@@ -1060,7 +1108,64 @@ export type BookContextMenuItemId =
  */
 export const withReadingStatus = (book: Book, status: ReadingStatus | undefined): Book => {
   const now = Date.now();
-  return { ...book, readingStatus: status, readingStatusUpdatedAt: now, updatedAt: now };
+  const updated = { ...book, readingStatus: status, readingStatusUpdatedAt: now, updatedAt: now };
+  // A book joining Up Next goes to the end of the queue: every position in it
+  // was assigned no later than now.
+  if (status === 'upnext' && book.readingStatus !== 'upnext') {
+    updated.upNextOrder = now;
+    updated.upNextOrderUpdatedAt = now;
+  }
+  return updated;
+};
+
+export type UpNextMove = 'top' | 'up' | 'down';
+
+/**
+ * Move a book within the Up Next queue (every non-deleted 'upnext' book) and
+ * return the books whose position changed. The queue is renumbered 0..n-1, so
+ * ties and books without a position still move predictably. Only the order's
+ * own clock is stamped: `updatedAt` is the Date Read sort key and reordering is
+ * not reading (same as regrouping, #6414).
+ */
+export const moveInUpNextQueue = (
+  books: Book[],
+  hash: string,
+  move: UpNextMove,
+  now = Date.now(),
+): Book[] => {
+  const queue = books
+    .filter((b) => b.readingStatus === 'upnext' && !b.deletedAt)
+    .sort(
+      (a, b) =>
+        (getUpNextOrder(a) ?? Infinity) - (getUpNextOrder(b) ?? Infinity) ||
+        a.hash.localeCompare(b.hash),
+    );
+  const from = queue.findIndex((b) => b.hash === hash);
+  if (from < 0) return [];
+  const to = move === 'top' ? 0 : move === 'up' ? from - 1 : from + 1;
+  if (to < 0 || to >= queue.length || to === from) return [];
+  const [book] = queue.splice(from, 1);
+  queue.splice(to, 0, book!);
+  return queue.flatMap((b, index) =>
+    b.upNextOrder === index ? [] : [{ ...b, upNextOrder: index, upNextOrderUpdatedAt: now }],
+  );
+};
+
+type UpNextOrderFields = Pick<Book, 'upNextOrder' | 'upNextOrderUpdatedAt'>;
+
+/**
+ * Field-level last-writer-wins for the Up Next position, by its own
+ * `upNextOrderUpdatedAt` (ties → `a`). Mirrors {@link pickFresherReadingStatus}.
+ */
+export const pickFresherUpNextOrder = (
+  a: UpNextOrderFields,
+  b: UpNextOrderFields,
+): UpNextOrderFields => {
+  const winner = (a.upNextOrderUpdatedAt ?? 0) >= (b.upNextOrderUpdatedAt ?? 0) ? a : b;
+  return {
+    upNextOrder: winner.upNextOrder,
+    upNextOrderUpdatedAt: winner.upNextOrderUpdatedAt,
+  };
 };
 
 type ReadingStatusFields = Pick<Book, 'readingStatus' | 'readingStatusUpdatedAt'>;
@@ -1167,14 +1272,19 @@ export const getBookContextMenuItemIds = (
 ): BookContextMenuItemId[] => {
   const ids: BookContextMenuItemId[] = ['select', 'group'];
   ids.push(book.readingStatus === 'finished' ? 'markUnread' : 'markFinished');
+  if (book.readingStatus !== 'upnext') ids.push('markUpNext');
   if (book.readingStatus !== 'abandoned') ids.push('markAbandoned');
   // "Clear Status" is offered only when the book has an explicit status set.
   if (
     book.readingStatus === 'finished' ||
     book.readingStatus === 'unread' ||
-    book.readingStatus === 'abandoned'
+    book.readingStatus === 'abandoned' ||
+    book.readingStatus === 'upnext'
   ) {
     ids.push('clearStatus');
+  }
+  if (book.readingStatus === 'upnext') {
+    ids.push('moveUpNextToTop', 'moveUpNextUp', 'moveUpNextDown');
   }
   ids.push('showDetails', 'showInFinder', 'searchGoodreads');
   // A feed book has no file to move: every transfer action would fail, and the

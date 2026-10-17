@@ -2606,5 +2606,11 @@
   "{{count}} voices available_other": "{{count}} stemmen beschikbaar",
   "Multilingual": "Meertalig",
   "Expressive": "Expressief",
-  "Show Page Thumbnails": "Paginaminiaturen weergeven"
+  "Show Page Thumbnails": "Paginaminiaturen weergeven",
+  "Up Next": "Hierna",
+  "Mark as Up Next": "Markeren als hierna",
+  "Move to Top": "Naar boven verplaatsen",
+  "Move Up": "Omhoog",
+  "Move Down": "Omlaag",
+  "Up Next Order": "Volgorde hierna"
 }

@@ -2613,5 +2613,11 @@
   "{{count}} Notes_one": "{{count}} not",
   "{{count}} Notes_other": "{{count}} not",
   "Within {{count}} words_one": "{{count}} kelime içinde",
-  "Within {{count}} words_other": "{{count}} kelime içinde"
+  "Within {{count}} words_other": "{{count}} kelime içinde",
+  "Up Next": "Sıradaki",
+  "Mark as Up Next": "Sıradaki olarak işaretle",
+  "Move to Top": "En üste taşı",
+  "Move Up": "Yukarı taşı",
+  "Move Down": "Aşağı taşı",
+  "Up Next Order": "Sıradaki sırası"
 }

@@ -2866,5 +2866,11 @@
   "{{count}} voices available_other": "{{count}} صوت متاح",
   "Multilingual": "متعدد اللغات",
   "Expressive": "معبّر",
-  "Show Page Thumbnails": "إظهار الصور المصغرة للصفحات"
+  "Show Page Thumbnails": "إظهار الصور المصغرة للصفحات",
+  "Up Next": "التالي",
+  "Mark as Up Next": "تحديد كتالٍ",
+  "Move to Top": "نقل إلى الأعلى",
+  "Move Up": "نقل لأعلى",
+  "Move Down": "نقل لأسفل",
+  "Up Next Order": "ترتيب التالي"
 }

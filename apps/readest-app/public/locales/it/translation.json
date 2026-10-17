@@ -2671,5 +2671,11 @@
   "{{count}} voices available_other": "{{count}} voci disponibili",
   "Multilingual": "Multilingue",
   "Expressive": "Espressiva",
-  "Show Page Thumbnails": "Mostra miniature delle pagine"
+  "Show Page Thumbnails": "Mostra miniature delle pagine",
+  "Up Next": "Da leggere",
+  "Mark as Up Next": "Segna come da leggere",
+  "Move to Top": "Sposta in cima",
+  "Move Up": "Sposta su",
+  "Move Down": "Sposta giù",
+  "Up Next Order": "Ordine da leggere"
 }

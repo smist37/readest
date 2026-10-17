@@ -19,7 +19,7 @@ import {
   selectAbsOfflineBooks,
   buildGroupNameUpdatedAt,
   resolveCurrentShelfBooks,
-  withTimeRemainingLast,
+  withMissingSortValuesLast,
 } from '../../app/library/utils/libraryUtils';
 import { Book, BooksGroup, ReadingStatus } from '../../types/book';
 import { LibraryGroupByType, LibrarySortByType } from '../../types/settings';
@@ -1888,7 +1888,7 @@ describe('ensureLibrarySecondarySortByType', () => {
   });
 });
 
-describe('withTimeRemainingLast', () => {
+describe('withMissingSortValuesLast', () => {
   const createMockBook = (overrides: Partial<Book> = {}): Book =>
     ({
       hash: `hash-${overrides.title ?? 'x'}`,
@@ -1926,14 +1926,14 @@ describe('withTimeRemainingLast', () => {
   const byTimeAsc = createBookSorter(LibrarySortByType.TimeRemaining, 'en');
 
   it('keeps no-time items last when ascending', () => {
-    const sorter = withTimeRemainingLast<Book>(LibrarySortByType.TimeRemaining, byTimeAsc);
+    const sorter = withMissingSortValuesLast<Book>(LibrarySortByType.TimeRemaining, byTimeAsc);
     const sorted = [finished, unread, reading, nearlyDone].sort(sorter);
     expect(sorted.map((b) => b.title)).toEqual(['NearlyDone', 'Reading', 'Finished', 'Unread']);
   });
 
   it('keeps no-time items last when descending too', () => {
     // Descending = the comparator is negated; the no-time bucket must not flip with it.
-    const sorter = withTimeRemainingLast<Book>(
+    const sorter = withMissingSortValuesLast<Book>(
       LibrarySortByType.TimeRemaining,
       (a, b) => byTimeAsc(a, b) * -1,
     );
@@ -1942,7 +1942,7 @@ describe('withTimeRemainingLast', () => {
   });
 
   it('sinks groups, which never render a remaining time', () => {
-    const sorter = withTimeRemainingLast<Book | BooksGroup>(
+    const sorter = withMissingSortValuesLast<Book | BooksGroup>(
       LibrarySortByType.TimeRemaining,
       () => 0,
     );
@@ -1952,7 +1952,7 @@ describe('withTimeRemainingLast', () => {
   });
 
   it('leaves other sorts untouched', () => {
-    const sorter = withTimeRemainingLast<Book>(LibrarySortByType.Title, () => -1);
+    const sorter = withMissingSortValuesLast<Book>(LibrarySortByType.Title, () => -1);
     expect(sorter(finished, reading)).toBe(-1);
   });
 });

@@ -8,7 +8,7 @@
 -- KOReader would downgrade it. Reading *position* syncs via the progress
 -- channel, not here.
 --
---   Decisive: Readest  unread / finished / abandoned
+--   Decisive: Readest  unread / upnext / finished / abandoned
 --             KOReader complete / abandoned
 --
 -- On the unsynced baseline (a book whose Readest reading_status_updated_at is
@@ -19,11 +19,12 @@
 local M = {}
 
 -- Readest reading_status -> KOReader summary.status push target.
--- finished->complete, abandoned->abandoned, unread->nil (clear / "New").
+-- finished->complete, abandoned->abandoned, unread/upnext->nil (clear / "New":
+-- KOReader has no queue status, and an Up Next book is not started yet).
 -- 'reading'/undefined are non-decisive and never pushed.
 local READEST_TO_KO = { finished = "complete", abandoned = "abandoned" }
 function M.readest_to_ko(status)
-    if status == "unread" then return nil end
+    if status == "unread" or status == "upnext" then return nil end
     return READEST_TO_KO[status]
 end
 
@@ -36,7 +37,8 @@ end
 
 -- Is a Readest status a deliberate signal worth syncing?
 function M.readest_decisive(status)
-    return status == "unread" or status == "finished" or status == "abandoned"
+    return status == "unread" or status == "upnext" or status == "finished"
+        or status == "abandoned"
 end
 
 -- "YYYY-MM-DD" -> unix ms at local midnight; nil if unparseable.

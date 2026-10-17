@@ -2606,5 +2606,11 @@
   "{{count}} voices available_other": "{{count}} आवाज़ें उपलब्ध हैं",
   "Multilingual": "बहुभाषी",
   "Expressive": "अभिव्यंजक",
-  "Show Page Thumbnails": "पृष्ठ थंबनेल दिखाएँ"
+  "Show Page Thumbnails": "पृष्ठ थंबनेल दिखाएँ",
+  "Up Next": "आगे पढ़ें",
+  "Mark as Up Next": "आगे पढ़ें के रूप में चिह्नित करें",
+  "Move to Top": "सबसे ऊपर ले जाएँ",
+  "Move Up": "ऊपर ले जाएँ",
+  "Move Down": "नीचे ले जाएँ",
+  "Up Next Order": "आगे पढ़ें क्रम"
 }

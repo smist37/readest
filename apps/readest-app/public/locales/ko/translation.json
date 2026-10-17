@@ -2541,5 +2541,11 @@
   "{{count}} voices available_other": "사용 가능한 음성 {{count}}개",
   "Multilingual": "다국어",
   "Expressive": "표현력",
-  "Show Page Thumbnails": "페이지 썸네일 표시"
+  "Show Page Thumbnails": "페이지 썸네일 표시",
+  "Up Next": "다음에 읽기",
+  "Mark as Up Next": "다음에 읽기로 표시",
+  "Move to Top": "맨 위로 이동",
+  "Move Up": "위로 이동",
+  "Move Down": "아래로 이동",
+  "Up Next Order": "다음에 읽기 순서"
 }

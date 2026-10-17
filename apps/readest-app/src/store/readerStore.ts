@@ -484,7 +484,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     const existingBook = getBookByHash(id);
     if (existingBook) {
       let newReadingStatus = existingBook.readingStatus;
-      if (existingBook.readingStatus === 'unread') {
+      if (existingBook.readingStatus === 'unread' || existingBook.readingStatus === 'upnext') {
         newReadingStatus = undefined;
       }
       if (progressPercentage >= 100 && existingBook.readingStatus !== 'finished') {

@@ -366,8 +366,8 @@ export const markBookDeleted = (book: Book, deletedAt: number, purge: boolean) =
 };
 
 /**
- * The latest local edit on any of a book row's clocks. Group, metadata and
- * cover edits stamp only their own clock and leave `updatedAt` alone (#6414),
+ * The latest local edit on any of a book row's clocks. Group, metadata, cover
+ * and Up Next order edits stamp only their own clock and leave `updatedAt` alone (#6414),
  * so the sync push has to look at all of them to know the row changed.
  */
 export const getBookChangedAt = (book: Book): number =>
@@ -376,6 +376,7 @@ export const getBookChangedAt = (book: Book): number =>
     book.groupUpdatedAt ?? 0,
     book.metadataUpdatedAt ?? 0,
     book.coverUpdatedAt ?? 0,
+    book.upNextOrderUpdatedAt ?? 0,
   );
 
 /** True when `resolved` names a different group than `current` does. */
@@ -497,7 +498,8 @@ export const isCurrentlyReadingBook = (book: Book): boolean =>
   book.progress != null &&
   book.readingStatus !== 'finished' &&
   book.readingStatus !== 'abandoned' &&
-  book.readingStatus !== 'unread';
+  book.readingStatus !== 'unread' &&
+  book.readingStatus !== 'upnext';
 
 export const getBookDirFromWritingMode = (writingMode: WritingMode) => {
   switch (writingMode) {

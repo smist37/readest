@@ -2606,5 +2606,11 @@
   "{{count}} voices available_other": "{{count}} hang érhető el",
   "Multilingual": "Többnyelvű",
   "Expressive": "Kifejező",
-  "Show Page Thumbnails": "Oldalbélyegképek megjelenítése"
+  "Show Page Thumbnails": "Oldalbélyegképek megjelenítése",
+  "Up Next": "Következő",
+  "Mark as Up Next": "Megjelölés következőként",
+  "Move to Top": "Áthelyezés legfelülre",
+  "Move Up": "Áthelyezés feljebb",
+  "Move Down": "Áthelyezés lejjebb",
+  "Up Next Order": "Következők sorrendje"
 }

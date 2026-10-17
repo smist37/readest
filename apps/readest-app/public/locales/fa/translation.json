@@ -2606,5 +2606,11 @@
   "{{count}} voices available_other": "{{count}} صدا در دسترس است",
   "Multilingual": "چندزبانه",
   "Expressive": "رسا",
-  "Show Page Thumbnails": "نمایش تصاویر کوچک صفحات"
+  "Show Page Thumbnails": "نمایش تصاویر کوچک صفحات",
+  "Up Next": "بعدی",
+  "Mark as Up Next": "علامت‌گذاری به‌عنوان بعدی",
+  "Move to Top": "انتقال به بالاترین",
+  "Move Up": "انتقال به بالا",
+  "Move Down": "انتقال به پایین",
+  "Up Next Order": "ترتیب بعدی"
 }

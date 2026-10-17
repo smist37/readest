@@ -2736,5 +2736,11 @@
   "{{count}} voices available_other": "Na voljo je {{count}} glasov",
   "Multilingual": "Večjezični",
   "Expressive": "Izrazni",
-  "Show Page Thumbnails": "Prikaži sličice strani"
+  "Show Page Thumbnails": "Prikaži sličice strani",
+  "Up Next": "Naslednje",
+  "Mark as Up Next": "Označi kot naslednje",
+  "Move to Top": "Premakni na vrh",
+  "Move Up": "Premakni gor",
+  "Move Down": "Premakni dol",
+  "Up Next Order": "Vrstni red naslednjih"
 }

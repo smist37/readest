@@ -2606,5 +2606,11 @@
   "{{count}} voices available_other": "{{count}} குரல்கள் கிடைக்கின்றன",
   "Multilingual": "பன்மொழி",
   "Expressive": "உணர்ச்சிமிக்க",
-  "Show Page Thumbnails": "பக்க சிறுபடங்களைக் காட்டு"
+  "Show Page Thumbnails": "பக்க சிறுபடங்களைக் காட்டு",
+  "Up Next": "அடுத்து",
+  "Mark as Up Next": "அடுத்ததாகக் குறிக்கவும்",
+  "Move to Top": "மேலே முதலிடத்திற்கு நகர்த்து",
+  "Move Up": "மேலே நகர்த்து",
+  "Move Down": "கீழே நகர்த்து",
+  "Up Next Order": "அடுத்து வரிசை"
 }

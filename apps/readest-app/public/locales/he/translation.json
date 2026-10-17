@@ -2671,5 +2671,11 @@
   "{{count}} voices available_other": "{{count}} קולות זמינים",
   "Multilingual": "רב-לשוני",
   "Expressive": "אקספרסיבי",
-  "Show Page Thumbnails": "הצג תמונות ממוזערות של עמודים"
+  "Show Page Thumbnails": "הצג תמונות ממוזערות של עמודים",
+  "Up Next": "הבא בתור",
+  "Mark as Up Next": "סמן כהבא בתור",
+  "Move to Top": "העבר לראש",
+  "Move Up": "העבר למעלה",
+  "Move Down": "העבר למטה",
+  "Up Next Order": "סדר הבא בתור"
 }

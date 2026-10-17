@@ -19,6 +19,8 @@ CREATE TABLE public.books (
   progress integer[] NULL,
   reading_status text NULL,
   reading_status_updated_at timestamp with time zone NULL,
+  up_next_order double precision NULL,
+  up_next_order_updated_at timestamp with time zone NULL,
   cover_hash text NULL,
   cover_updated_at timestamp with time zone NULL,
   metadata_updated_at timestamp with time zone NULL,

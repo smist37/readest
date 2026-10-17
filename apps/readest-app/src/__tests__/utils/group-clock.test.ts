@@ -111,5 +111,6 @@ describe('group edits leave Date Read alone (issue #6414)', () => {
     expect(getBookChangedAt(book({ groupUpdatedAt: 30 }))).toBe(30);
     expect(getBookChangedAt(book({ metadataUpdatedAt: 40, groupUpdatedAt: null }))).toBe(40);
     expect(getBookChangedAt(book({ coverUpdatedAt: 50 }))).toBe(50);
+    expect(getBookChangedAt(book({ upNextOrderUpdatedAt: 60 }))).toBe(60);
   });
 });

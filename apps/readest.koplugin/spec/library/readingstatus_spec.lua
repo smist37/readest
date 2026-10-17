@@ -11,6 +11,7 @@ describe("readingstatus mapping (decisive-only)", function()
     assert.are.equal("complete", RS.readest_to_ko("finished"))
     assert.are.equal("abandoned", RS.readest_to_ko("abandoned"))
     assert.is_nil(RS.readest_to_ko("unread")) -- clear -> "New"
+    assert.is_nil(RS.readest_to_ko("upnext")) -- no KO queue status: clear -> "New"
     assert.is_nil(RS.readest_to_ko("reading")) -- non-decisive, never pushed
     assert.is_nil(RS.readest_to_ko(nil)) -- undefined
   end)
@@ -27,6 +28,7 @@ describe("readingstatus mapping (decisive-only)", function()
     assert.is_true(RS.readest_decisive("finished"))
     assert.is_true(RS.readest_decisive("abandoned"))
     assert.is_true(RS.readest_decisive("unread"))
+    assert.is_true(RS.readest_decisive("upnext"))
     assert.is_false(RS.readest_decisive("reading"))
     assert.is_false(RS.readest_decisive(nil))
   end)
@@ -150,6 +152,22 @@ describe("readingstatus reconcile — both decisive", function()
 end)
 
 describe("readingstatus reconcile — remaining transfer-graph cells", function()
+  it("a newer Readest 'upnext' clears a KO 'complete' instead of being reverted", function()
+    local r = RS.reconcile({ reading_status = "upnext", reading_status_updated_at = 2000 },
+                           { status = "complete", ts = 1000 }, NOW)
+    assert.is_true(r.write_ko)
+    assert.is_nil(r.ko_status) -- clear -> "New"
+    assert.is_false(r.write_store)
+    assert.are.equal("upnext", r.readest_status)
+  end)
+
+  it("upnext × New: already in agreement, nothing to write", function()
+    local r = RS.reconcile({ reading_status = "upnext", reading_status_updated_at = 2000 },
+                           { status = nil, ts = 0 }, NOW)
+    assert.is_false(r.write_ko)
+    assert.is_false(r.write_store)
+  end)
+
   it("unread × reading: pushes a clear to KO + stamps", function()
     local r = RS.reconcile({ reading_status = "unread", reading_status_updated_at = 0 },
                            { status = "reading", ts = 1000 }, NOW)

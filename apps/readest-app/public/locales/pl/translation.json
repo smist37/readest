@@ -2736,5 +2736,11 @@
   "{{count}} voices available_other": "{{count}} dostępnego głosu",
   "Multilingual": "Wielojęzyczny",
   "Expressive": "Ekspresyjny",
-  "Show Page Thumbnails": "Pokaż miniatury stron"
+  "Show Page Thumbnails": "Pokaż miniatury stron",
+  "Up Next": "Następne",
+  "Mark as Up Next": "Oznacz jako następne",
+  "Move to Top": "Przenieś na górę",
+  "Move Up": "Przenieś w górę",
+  "Move Down": "Przenieś w dół",
+  "Up Next Order": "Kolejność następnych"
 }

@@ -2736,5 +2736,11 @@
   "{{count}} voices available_other": "Доступно {{count}} голосу",
   "Multilingual": "Багатомовний",
   "Expressive": "Виразний",
-  "Show Page Thumbnails": "Показувати мініатюри сторінок"
+  "Show Page Thumbnails": "Показувати мініатюри сторінок",
+  "Up Next": "Далі",
+  "Mark as Up Next": "Позначити як наступне",
+  "Move to Top": "Перемістити на початок",
+  "Move Up": "Перемістити вгору",
+  "Move Down": "Перемістити вниз",
+  "Up Next Order": "Порядок черги"
 }

@@ -388,6 +388,20 @@ describe('transformBook readingStatus + readingStatusUpdatedAt', () => {
     expect(db.reading_status_updated_at).toBeNull();
   });
 
+  it('round-trips the Up Next status and queue position', () => {
+    const ts = Date.UTC(2026, 9, 17, 12, 0, 0);
+    const db = transformBookToDB(
+      { ...baseBook, readingStatus: 'upnext', upNextOrder: 2, upNextOrderUpdatedAt: ts },
+      userId,
+    );
+    expect(db.up_next_order).toBe(2);
+    expect(db.up_next_order_updated_at).toBe(new Date(ts).toISOString());
+    const back = transformBookFromDB(db);
+    expect(back.readingStatus).toBe('upnext');
+    expect(back.upNextOrder).toBe(2);
+    expect(back.upNextOrderUpdatedAt).toBe(ts);
+  });
+
   it('round-trips abandoned + timestamp back to the client shape', () => {
     const ts = Date.UTC(2026, 5, 18, 12, 0, 0);
     const db = transformBookToDB(

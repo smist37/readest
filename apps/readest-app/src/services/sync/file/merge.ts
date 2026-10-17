@@ -169,6 +169,11 @@ export const mergeBookMetadata = (local: Book, remote: Book): Book => {
     merged.readingStatus = remote.readingStatus;
     merged.readingStatusUpdatedAt = remote.readingStatusUpdatedAt;
   }
+  // The Up Next position likewise merges on its own clock.
+  if ((remote.upNextOrderUpdatedAt ?? 0) > (local.upNextOrderUpdatedAt ?? 0)) {
+    merged.upNextOrder = remote.upNextOrder;
+    merged.upNextOrderUpdatedAt = remote.upNextOrderUpdatedAt;
+  }
   // The metadata group (title, author, tags, metadata) additionally merges on
   // its own metadataUpdatedAt clock — the client-side mirror of the native
   // server merge (issue #5438, same shape as the readingStatus clause above).
@@ -229,14 +234,16 @@ export const isRemoteBookClockNewer = (local: Book, remote: Book): boolean =>
   (remote.metadataUpdatedAt ?? 0) > (local.metadataUpdatedAt ?? 0);
 
 /**
- * {@link isRemoteBookClockNewer} plus the group clock: true when the remote
- * index ROW is newer. Grouping stamps only groupUpdatedAt (#6414), so a
- * group-only change must still travel through library.json — but it moves no
- * bytes, which is why the group clock stays out of isRemoteBookClockNewer.
+ * {@link isRemoteBookClockNewer} plus the group and Up Next order clocks: true
+ * when the remote index ROW is newer. Grouping and reordering stamp only their
+ * own clock (#6414), so such a change must still travel through library.json —
+ * but it moves no bytes, which is why those clocks stay out of
+ * isRemoteBookClockNewer.
  */
 export const isRemoteBookRowNewer = (local: Book, remote: Book): boolean =>
   isRemoteBookClockNewer(local, remote) ||
-  (remote.groupUpdatedAt ?? 0) > (local.groupUpdatedAt ?? 0);
+  (remote.groupUpdatedAt ?? 0) > (local.groupUpdatedAt ?? 0) ||
+  (remote.upNextOrderUpdatedAt ?? 0) > (local.upNextOrderUpdatedAt ?? 0);
 
 export const shouldApplyRemoteBookMetadata = (local: Book, remote: Book): boolean =>
   !remote.deletedAt && !local.deletedAt && isRemoteBookRowNewer(local, remote);

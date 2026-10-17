@@ -1,6 +1,6 @@
 import type { Book } from '@/types/book';
 import type { BookshelfDefinition, BookshelfFilterGroup, BookshelfRule } from '@/types/bookshelf';
-import { createBookSorter, withTimeRemainingLast } from '@/app/library/utils/libraryUtils';
+import { createBookSorter, withMissingSortValuesLast } from '@/app/library/utils/libraryUtils';
 import { bookshelfSchema, effectiveBookshelves, FINISHED_BOOKSHELF_ID } from './definitions';
 import { getBookshelfField } from './fields';
 
@@ -176,7 +176,10 @@ export const evaluateBookshelves = (
       const { by, thenBy, ascending, thenAscending } = definition.sort;
       const compare = createBookSorter(by, locale, thenBy, ascending, thenAscending, pageDurations);
       available.sort(
-        withTimeRemainingLast<Book>(by, (a, b) => compare(a, b) || a.hash.localeCompare(b.hash)),
+        withMissingSortValuesLast<Book>(
+          by,
+          (a, b) => compare(a, b) || a.hash.localeCompare(b.hash),
+        ),
       );
       return {
         definition,

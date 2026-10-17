@@ -2606,5 +2606,11 @@
   "{{count}} voices available_other": "{{count}} röster tillgängliga",
   "Multilingual": "Flerspråkig",
   "Expressive": "Uttrycksfull",
-  "Show Page Thumbnails": "Visa sidminiatyrer"
+  "Show Page Thumbnails": "Visa sidminiatyrer",
+  "Up Next": "Härnäst",
+  "Mark as Up Next": "Markera som härnäst",
+  "Move to Top": "Flytta överst",
+  "Move Up": "Flytta upp",
+  "Move Down": "Flytta ned",
+  "Up Next Order": "Ordning för härnäst"
 }

@@ -132,6 +132,8 @@ describe('readingStatusToBookOrbit', () => {
     expect(readingStatusToBookOrbit('finished')).toBe('complete');
     expect(readingStatusToBookOrbit('abandoned')).toBe('abandoned');
     expect(readingStatusToBookOrbit('unread')).toBeUndefined();
+    // BookOrbit has no queue status, so Up Next is never pushed.
+    expect(readingStatusToBookOrbit('upnext')).toBeUndefined();
     expect(readingStatusToBookOrbit(undefined)).toBeUndefined();
   });
 });

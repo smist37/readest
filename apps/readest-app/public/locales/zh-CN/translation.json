@@ -2541,5 +2541,11 @@
   "{{count}} voices available_other": "可用语音 {{count}} 个",
   "Multilingual": "多语言",
   "Expressive": "富有表现力",
-  "Show Page Thumbnails": "显示页面缩略图"
+  "Show Page Thumbnails": "显示页面缩略图",
+  "Up Next": "待读",
+  "Mark as Up Next": "标记为待读",
+  "Move to Top": "移到顶部",
+  "Move Up": "上移",
+  "Move Down": "下移",
+  "Up Next Order": "待读顺序"
 }

@@ -26,7 +26,7 @@ export type BookFormat =
   // Streaming audiobook from BookOrbit's audiobook API; filePath is bookorbit://<bookId> (#6224)
   | 'BOOKORBIT';
 export type BookNoteType = 'bookmark' | 'annotation' | 'excerpt' | 'notebook' | 'ink';
-export type ReadingStatus = 'unread' | 'reading' | 'finished' | 'abandoned';
+export type ReadingStatus = 'unread' | 'reading' | 'finished' | 'abandoned' | 'upnext';
 export type HighlightStyle = 'highlight' | 'underline' | 'squiggly';
 // Predefined highlight colors, can be extended with custom hex colors
 export type HighlightColor = 'red' | 'yellow' | 'green' | 'blue' | 'violet' | string;
@@ -155,6 +155,11 @@ export interface Book {
   progress?: [number, number] | null; // Add progress field: [current, total], 1-based page number
   readingStatus?: ReadingStatus;
   readingStatusUpdatedAt?: number; // ms; bumped only when readingStatus changes
+  // Position in the Up Next queue (ascending), read only while readingStatus is
+  // 'upnext'. Merges on its own upNextOrderUpdatedAt clock, which a reorder
+  // stamps without touching updatedAt (the Date Read sort key).
+  upNextOrder?: number | null;
+  upNextOrderUpdatedAt?: number | null;
   primaryLanguage?: string;
   // The book carries its own recorded narration (EPUB 3 Media Overlays), so the
   // library can badge it without opening the file. Derived from the file on

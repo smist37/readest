@@ -2541,5 +2541,11 @@
   "{{count}} voices available_other": "มี {{count}} เสียงให้ใช้งาน",
   "Multilingual": "หลายภาษา",
   "Expressive": "แสดงอารมณ์",
-  "Show Page Thumbnails": "แสดงภาพขนาดย่อของหน้า"
+  "Show Page Thumbnails": "แสดงภาพขนาดย่อของหน้า",
+  "Up Next": "อ่านถัดไป",
+  "Mark as Up Next": "ทำเครื่องหมายว่าอ่านถัดไป",
+  "Move to Top": "ย้ายไปบนสุด",
+  "Move Up": "ย้ายขึ้น",
+  "Move Down": "ย้ายลง",
+  "Up Next Order": "ลำดับอ่านถัดไป"
 }

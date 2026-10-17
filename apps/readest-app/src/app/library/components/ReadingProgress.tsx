@@ -35,13 +35,15 @@ const ReadingProgress: React.FC<ReadingProgressProps> = memo(
       );
     }
 
-    if (book.readingStatus === 'abandoned') {
+    if (book.readingStatus === 'abandoned' || book.readingStatus === 'upnext') {
       return (
         <div
           className='text-neutral-content/70 flex items-center justify-between gap-2 text-xs'
           role='status'
         >
-          <StatusBadge status={book.readingStatus}>{_('On hold')}</StatusBadge>
+          <StatusBadge status={book.readingStatus}>
+            {book.readingStatus === 'upnext' ? _('Up Next') : _('On hold')}
+          </StatusBadge>
           {progressPercentage !== null && !Number.isNaN(progressPercentage) && (
             <span>{progressPercentage}%</span>
           )}

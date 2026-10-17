@@ -31,6 +31,8 @@ import {
   selectAbsOfflineBooks,
   selectDownloadableBooks,
   withReadingStatus,
+  moveInUpNextQueue,
+  type UpNextMove,
 } from '../utils/libraryUtils';
 import { readBookshelves } from '@/services/bookshelves/state';
 import {
@@ -684,6 +686,14 @@ const Bookshelf: React.FC<BookshelfProps> = ({
     [envConfig, updateBooks],
   );
 
+  const handleMoveUpNext = useCallback(
+    async (book: Book, move: UpNextMove) => {
+      const movedBooks = moveInUpNextQueue(useLibraryStore.getState().library, book.hash, move);
+      await updateBooks(envConfig, movedBooks);
+    },
+    [envConfig, updateBooks],
+  );
+
   const handleDeleteBooksIntent = (event: CustomEvent) => {
     const { ids } = event.detail;
     setBookIdsToDelete(ids);
@@ -886,6 +896,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
         handleShowDetailsBook={handleShowDetailsBook}
         handleLibraryNavigation={(group) => handleLibraryNavigation(group, shelf.id)}
         handleUpdateReadingStatus={handleUpdateReadingStatus}
+        handleMoveUpNext={handleMoveUpNext}
         transferProgress={'hash' in item ? (transferProgress[item.hash] ?? null) : null}
         showTimeRemaining={
           shelf.sort.by === 'timeRemaining' || shelf.sort.thenBy === 'timeRemaining'
@@ -905,6 +916,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
       handleShowDetailsBook,
       handleLibraryNavigation,
       handleUpdateReadingStatus,
+      handleMoveUpNext,
       transferProgress,
       showSeriesIndex,
     ],

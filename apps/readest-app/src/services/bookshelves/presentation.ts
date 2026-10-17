@@ -12,7 +12,7 @@ import {
   getBookSortValue,
   getGroupSortValue,
   compareSortValues,
-  withTimeRemainingLast,
+  withMissingSortValuesLast,
   resolveCurrentShelfBooks,
 } from '@/app/library/utils/libraryUtils';
 
@@ -111,7 +111,7 @@ export const presentBookshelf = (
   // For series groups, series index is always ascending; sort direction applies to fallback only
   const sortAscending = sortOrder === 'asc';
   const thenSortAscending = thenSortOrder === 'asc';
-  const withinGroupSorter = withTimeRemainingLast<Book>(
+  const withinGroupSorter = withMissingSortValuesLast<Book>(
     sortBy,
     createWithinGroupSorter(
       groupBy,
@@ -145,7 +145,7 @@ export const presentBookshelf = (
     // to avoid the merge sort below overriding the within-group sort order
     return ungroupedBooks;
   } else {
-    ungroupedBooks.sort(withTimeRemainingLast<Book>(sortBy, bookSorter));
+    ungroupedBooks.sort(withMissingSortValuesLast<Book>(sortBy, bookSorter));
   }
 
   // Merge groups and ungrouped books, then sort them together
@@ -153,7 +153,7 @@ export const presentBookshelf = (
   const groupSorter = createGroupSorter(sortBy, uiLanguage, groupBy);
 
   allItems.sort(
-    withTimeRemainingLast<Book | BooksGroup>(sortBy, (a, b) => {
+    withMissingSortValuesLast<Book | BooksGroup>(sortBy, (a, b) => {
       const isAGroup = 'books' in a;
       const isBGroup = 'books' in b;
 

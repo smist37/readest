@@ -2606,5 +2606,11 @@
   "{{count}} voices available_other": "හඬ {{count}}ක් ලබා ගත හැක",
   "Multilingual": "බහුභාෂා",
   "Expressive": "ප්‍රකාශනශීලී",
-  "Show Page Thumbnails": "පිටු සිඟිති රූ පෙන්වන්න"
+  "Show Page Thumbnails": "පිටු සිඟිති රූ පෙන්වන්න",
+  "Up Next": "ඊළඟට",
+  "Mark as Up Next": "ඊළඟට ලෙස සලකුණු කරන්න",
+  "Move to Top": "ඉහළටම ගෙන යන්න",
+  "Move Up": "ඉහළට ගෙන යන්න",
+  "Move Down": "පහළට ගෙන යන්න",
+  "Up Next Order": "ඊළඟට අනුපිළිවෙල"
 }

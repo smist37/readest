@@ -2606,5 +2606,11 @@
   "{{count}} voices available_other": "{{count}} διαθέσιμες φωνές",
   "Multilingual": "Πολύγλωσση",
   "Expressive": "Εκφραστική",
-  "Show Page Thumbnails": "Εμφάνιση μικρογραφιών σελίδων"
+  "Show Page Thumbnails": "Εμφάνιση μικρογραφιών σελίδων",
+  "Up Next": "Επόμενο",
+  "Mark as Up Next": "Σήμανση ως επόμενο",
+  "Move to Top": "Μετακίνηση στην κορυφή",
+  "Move Up": "Μετακίνηση πάνω",
+  "Move Down": "Μετακίνηση κάτω",
+  "Up Next Order": "Σειρά επόμενων"
 }

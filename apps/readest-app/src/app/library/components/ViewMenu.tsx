@@ -34,6 +34,7 @@ const SORT_BY_ORDER: LibrarySortByType[] = [
   LibrarySortByType.Published,
   LibrarySortByType.Progress,
   LibrarySortByType.TimeRemaining,
+  LibrarySortByType.UpNext,
 ];
 
 const ViewMenu: React.FC<ViewMenuProps> = ({ setIsDropdownOpen }) => {

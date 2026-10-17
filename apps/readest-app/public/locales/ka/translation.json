@@ -2606,5 +2606,11 @@
   "{{count}} voices available_other": "ხელმისაწვდომია {{count}} ხმა",
   "Multilingual": "მრავალენოვანი",
   "Expressive": "ექსპრესიული",
-  "Show Page Thumbnails": "გვერდის მინიატურების ჩვენება"
+  "Show Page Thumbnails": "გვერდის მინიატურების ჩვენება",
+  "Up Next": "შემდეგი",
+  "Mark as Up Next": "მონიშვნა როგორც შემდეგი",
+  "Move to Top": "ზემოთ გადატანა",
+  "Move Up": "ერთით ზემოთ",
+  "Move Down": "ერთით ქვემოთ",
+  "Up Next Order": "შემდეგის რიგი"
 }
