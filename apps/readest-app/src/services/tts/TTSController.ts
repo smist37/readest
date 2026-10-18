@@ -87,6 +87,12 @@ const TTS_NATIVE_SPEAK_MAX_CONSECUTIVE_ERRORS = 5;
 // paragraphs until about this much estimated audio, at most this many.
 const PRELOAD_AHEAD_SEC = 180;
 const PRELOAD_MAX_PARAGRAPHS = 40;
+// Audio-preloading engines (TTSCapabilities.preloadsAudio): preload at least
+// `count` paragraphs, and more while they add up to under this much estimated
+// audio (1.0x), so a run of one-line dialogue paragraphs cannot outrun the
+// prepared openings of the paragraphs after it.
+const PRELOAD_MIN_AHEAD_SEC = 30;
+const PRELOAD_MAX_SHORT_PARAGRAPHS = 16;
 // Preload the next paragraphs this long after a paragraph starts at the latest.
 const PRELOAD_NEXT_AFTER_MS = 500;
 
@@ -1643,7 +1649,12 @@ export class TTSController extends EventTarget {
     // paragraphs requested, however short they are, so the buffer never drains.
     const capabilities = this.ttsClient.getCapabilities();
     const byDuration = !!capabilities.windowedPrefetch;
-    const maxCount = byDuration ? PRELOAD_MAX_PARAGRAPHS : count;
+    const minSec = !byDuration && capabilities.preloadsAudio ? PRELOAD_MIN_AHEAD_SEC : 0;
+    const maxCount = byDuration
+      ? PRELOAD_MAX_PARAGRAPHS
+      : minSec
+        ? Math.max(count, PRELOAD_MAX_SHORT_PARAGRAPHS)
+        : count;
     const voiceId = this.ttsClient.getVoiceId();
     let seconds = 0;
 
@@ -1657,16 +1668,18 @@ export class TTSController extends EventTarget {
     const rawSsmls: string[] = [];
     let sectionEnded = false;
     const reading = tts.getLastRange();
-    for (let i = 0; i < maxCount; i++) {
+    const budgetLeft = () =>
+      byDuration
+        ? rawSsmls.length < maxCount && seconds < PRELOAD_AHEAD_SEC
+        : rawSsmls.length < count || (seconds < minSec && rawSsmls.length < maxCount);
+    while (budgetLeft()) {
       const ssml = tts.next();
       if (!ssml) {
         sectionEnded = true;
         break;
       }
       rawSsmls.push(ssml);
-      if (!byDuration) continue;
-      seconds += estimate(ssml);
-      if (seconds >= PRELOAD_AHEAD_SEC) break;
+      if (byDuration || minSec) seconds += estimate(ssml);
     }
     for (let i = 0; i < rawSsmls.length; i++) {
       tts.prev();
@@ -1684,9 +1697,10 @@ export class TTSController extends EventTarget {
     // The document read ends inside the budget: carry on into what follows, so
     // moving on finds its opening already synthesized. In a chunked section
     // that is the next chunk, long before the chapter ends.
-    const budgetLeft = () =>
-      rawSsmls.length < maxCount && (!byDuration || seconds < PRELOAD_AHEAD_SEC);
-    if ((byDuration || capabilities.preloadsAudio) && sectionEnded && budgetLeft()) {
+    // Into the next chapter, only the usual handful: the short-paragraph
+    // extension is for a run of dialogue in the chapter being read.
+    const carryLeft = () => (byDuration ? budgetLeft() : rawSsmls.length < count);
+    if ((byDuration || capabilities.preloadsAudio) && sectionEnded && carryLeft()) {
       if (!this.#nextOpening || this.#nextOpening.after !== this.#ttsDoc) {
         const chunkAnchor = this.#adjacentChunkAnchor(1);
         this.#nextOpening = {
@@ -1697,7 +1711,7 @@ export class TTSController extends EventTarget {
         };
       }
       for (const ssml of await this.#nextOpening.ssmls) {
-        if (!budgetLeft()) break;
+        if (!carryLeft()) break;
         rawSsmls.push(ssml);
         seconds += estimate(ssml);
       }

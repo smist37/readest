@@ -27,6 +27,7 @@
 // native-tts plugin (getMediaSession -> TauriMediaSession).
 
 import type { TTSAudioPlayer } from './TTSAudioPlayer';
+import { idleTick, PREPARED_AHEAD_SEC } from './preparedAhead';
 
 export interface TTSAudioBuffer {
   readonly sampleRate: number;
@@ -338,12 +339,43 @@ export class WebAudioPlayer implements TTSAudioPlayer {
     for (;;) {
       const session = this.#session;
       if (!session || session.generation !== generation) return false;
-      if (this.#isReadyForMore(session)) return true;
+      const readiness = this.#readiness(session);
+      if (readiness === 'ready') return true;
+      if (readiness === 'topping-up') {
+        // Ahead of the minimum: prepare the next chunk in an idle slice.
+        await idleTick();
+        const now = this.#session;
+        return !!now && now.generation === generation;
+      }
       const ready = await new Promise<boolean>((resolve) => {
         session.waiters.push(resolve);
+        // onended only fires at chunk ends; wake when the queue falls to the
+        // target even if no chunk ends first (one long chunk queued).
+        const ctx = this.#ctx;
+        if (!ctx) return;
+        const aheadSec = session.nextStartTime - ctx.currentTime;
+        const wakeMs = Math.max(50, (aheadSec - PREPARED_AHEAD_SEC) * 1000);
+        if (aheadSec < MAX_AHEAD_SEC) {
+          setTimeout(() => {
+            const index = session.waiters.indexOf(resolve);
+            if (index < 0) return;
+            session.waiters.splice(index, 1);
+            resolve(true);
+          }, wakeMs);
+        }
       });
       if (!ready) return false;
     }
+  }
+
+  // Seconds of audio already scheduled ahead of the playhead in the live
+  // session (0 with none): how long the main thread can be busy without the
+  // speakers going quiet.
+  scheduledAheadSec(): number {
+    const session = this.#session;
+    const ctx = this.#ctx;
+    if (!session || !ctx || session.chunks.length === 0) return 0;
+    return Math.max(0, session.nextStartTime - ctx.currentTime);
   }
 
   async pauseContext(): Promise<void> {
@@ -403,18 +435,22 @@ export class WebAudioPlayer implements TTSAudioPlayer {
     this.#ctx = null;
   }
 
-  #isReadyForMore(session: PlayerSession): boolean {
+  // 'ready': below the chunk-count minimum, schedule at once. 'topping-up':
+  // the count is met but less than PREPARED_AHEAD_SEC is queued, so keep
+  // preparing, one chunk per idle slice. 'full': wait for the playhead.
+  #readiness(session: PlayerSession): 'ready' | 'topping-up' | 'full' {
     const unfinished = session.chunks.reduce((n, c) => n + (c.ended ? 0 : 1), 0);
     const limit =
       typeof document !== 'undefined' && document.visibilityState === 'hidden'
         ? MAX_PENDING_HIDDEN
         : MAX_PENDING_VISIBLE;
-    if (unfinished >= limit) return false;
+    let aheadSec = 0;
     if (this.#ctx && session.chunks.length > 0) {
-      const aheadSec = session.nextStartTime - this.#ctx.currentTime;
-      if (aheadSec >= MAX_AHEAD_SEC) return false;
+      aheadSec = session.nextStartTime - this.#ctx.currentTime;
+      if (aheadSec >= MAX_AHEAD_SEC) return 'full';
     }
-    return true;
+    if (unfinished < limit) return 'ready';
+    return aheadSec < PREPARED_AHEAD_SEC ? 'topping-up' : 'full';
   }
 
   #handleChunkEnded(session: PlayerSession, chunk: ScheduledChunk): void {
