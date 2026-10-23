@@ -420,7 +420,7 @@ export const hashTTSPayload = (payload: EdgeTTSPayload): string => {
 
 export type EDGE_TTS_PROTOCOL = 'wss' | 'https';
 
-// Inactivity budget for the Tauri WebSocket transport. Synthesis frames
+// Inactivity budget for the WebSocket transports. Synthesis frames
 // stream continuously once the request is sent; a socket silent this long is
 // dead and would otherwise hang playback forever (#5230).
 const WS_INACTIVITY_TIMEOUT_MS = 30_000;
@@ -791,6 +791,22 @@ export class EdgeSpeechTTS {
 
         let audioData = new ArrayBuffer(0);
         const boundaries: TTSWordBoundary[] = [];
+        let settled = false;
+        let inactivityTimer: ReturnType<typeof setTimeout> | undefined;
+        const settle = (complete: () => void) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(inactivityTimer);
+          complete();
+        };
+        const armInactivityTimer = () => {
+          clearTimeout(inactivityTimer);
+          inactivityTimer = setTimeout(() => {
+            settle(() => reject(new Error('WebSocket timed out waiting for audio.')));
+            ws.close();
+          }, WS_INACTIVITY_TIMEOUT_MS);
+        };
+        armInactivityTimer();
 
         ws.addEventListener('open', () => {
           ws.send(config);
@@ -798,16 +814,20 @@ export class EdgeSpeechTTS {
         });
 
         ws.addEventListener('message', (event: WebSocket.MessageEvent) => {
+          if (settled) return;
+          armInactivityTimer();
           if (typeof event.data === 'string') {
             const { headers, body } = getHeadersAndData(event.data);
             if (headers['Path'] === 'audio.metadata') {
               boundaries.push(...parseAudioMetadataBody(body.trim()));
             } else if (headers['Path'] === 'turn.end') {
               ws.close();
-              if (!audioData.byteLength) {
-                return reject(new Error('No audio data received.'));
-              }
-              resolve({ response: new Response(audioData), boundaries });
+              settle(() => {
+                if (!audioData.byteLength) {
+                  return reject(new Error('No audio data received.'));
+                }
+                resolve({ response: new Response(audioData), boundaries });
+              });
             }
           } else if (event.data instanceof ArrayBuffer) {
             const dataView = new DataView(event.data);
@@ -823,13 +843,14 @@ export class EdgeSpeechTTS {
         });
 
         ws.addEventListener('close', () => {
-          if (!audioData.byteLength) {
-            reject(new Error('No audio data received.'));
-          }
+          const message = audioData.byteLength
+            ? 'WebSocket closed before audio completed.'
+            : 'No audio data received.';
+          settle(() => reject(new Error(message)));
         });
 
         ws.addEventListener('error', () => {
-          reject(new Error('WebSocket error occurred.'));
+          settle(() => reject(new Error('WebSocket error occurred.')));
         });
       });
     }

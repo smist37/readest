@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Controllable WebSocket fake for the browser (isomorphic-ws) transport.
 const wsState = vi.hoisted(() => ({
@@ -144,6 +144,71 @@ describe('EdgeSpeechTTS.createAudioData word boundaries (browser WebSocket path)
 
     const { boundaries } = await promise;
     expect(boundaries).toEqual([]);
+  });
+});
+
+describe('EdgeSpeechTTS browser WebSocket transport on a dropped connection', () => {
+  beforeEach(() => {
+    wsState.instances.length = 0;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const payload = (text: string) => ({
+    lang: 'en',
+    text,
+    voice: 'en-US-AriaNeural',
+    rate: 1.0,
+    pitch: 1.0,
+  });
+
+  const settleState = async (p: Promise<unknown>) => {
+    let state = 'pending';
+    p.then(
+      () => (state = 'resolved'),
+      () => (state = 'rejected'),
+    );
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+    return state;
+  };
+
+  test('rejects when the socket closes after partial audio, and a retry opens a new socket', async () => {
+    const { EdgeSpeechTTS } = await import('@/libs/edgeTTS');
+    const tts = new EdgeSpeechTTS('wss');
+    const promise = tts.createAudioData(payload('closed mid-stream'));
+    promise.catch(() => {});
+    await vi.waitFor(() => expect(wsState.instances.length).toBe(1));
+    const ws = wsState.instances[0]!;
+    ws.emit('open');
+    ws.emit('message', { data: makeBinaryAudioFrame(new Uint8Array([1, 2])) });
+    ws.emit('close');
+    expect(await settleState(promise)).toBe('rejected');
+    await expect(promise).rejects.toThrow(/closed/i);
+
+    const retry = tts.createAudioData(payload('closed mid-stream'));
+    await vi.waitFor(() => expect(wsState.instances.length).toBe(2));
+    const ws2 = wsState.instances[1]!;
+    ws2.emit('open');
+    ws2.emit('message', { data: makeBinaryAudioFrame(new Uint8Array([3, 4])) });
+    ws2.emit('message', { data: 'Path:turn.end\r\n\r\n' });
+    expect(new Uint8Array((await retry).data)).toEqual(new Uint8Array([3, 4]));
+  });
+
+  test('rejects after prolonged silence (half-open socket)', async () => {
+    vi.useFakeTimers();
+    const { EdgeSpeechTTS } = await import('@/libs/edgeTTS');
+    const tts = new EdgeSpeechTTS('wss');
+    const promise = tts.createAudioData(payload('half-open browser socket'));
+    promise.catch(() => {});
+    await vi.waitFor(() => expect(wsState.instances.length).toBe(1));
+    const ws = wsState.instances[0]!;
+    ws.emit('open');
+    ws.emit('message', { data: makeBinaryAudioFrame(new Uint8Array([1, 2])) });
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(await settleState(promise)).toBe('rejected');
+    await expect(promise).rejects.toThrow(/timed out/i);
   });
 });
 
