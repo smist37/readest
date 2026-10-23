@@ -1,6 +1,15 @@
+'use client';
+
 import Image from 'next/image';
+import { useEffect } from 'react';
 
 export default function Offline() {
+  useEffect(() => {
+    const reload = () => window.location.reload();
+    window.addEventListener('online', reload);
+    return () => window.removeEventListener('online', reload);
+  }, []);
+
   return (
     <div className='flex min-h-screen flex-col items-center justify-center bg-gray-100 text-center'>
       <div className='mb-4'>

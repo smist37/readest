@@ -185,7 +185,7 @@ const withPWA = pwaDisabled
       swSrc: 'src/sw.ts',
       swDest: 'public/sw.js',
       cacheOnNavigation: true,
-      reloadOnOnline: true,
+      reloadOnOnline: false,
       disable: false,
       register: true,
       scope: '/',

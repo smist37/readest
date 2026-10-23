@@ -92,3 +92,32 @@ describe('Browser-only database WASM', () => {
     expect(web.turbopack?.resolveAlias?.['@readest/turso-database-wasm/webpack']).toBeUndefined();
   });
 });
+
+describe('Service worker registration', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  // Android fires `offline`/`online` on every brief cellular drop, and a reload
+  // then stops Read Aloud mid-chapter.
+  test('the web build does not reload the page when the connection comes back', async () => {
+    vi.stubEnv('NEXT_PUBLIC_APP_PLATFORM', 'web');
+    vi.resetModules();
+    const web = (await import('../../next.config.mjs')).default;
+    const defines: Record<string, string> = {};
+    class DefinePlugin {
+      constructor(definitions: Record<string, string>) {
+        Object.assign(defines, definitions);
+      }
+    }
+    web.webpack?.({ resolve: { alias: {} }, plugins: [], entry: async () => ({}) }, {
+      webpack: { DefinePlugin },
+      isServer: true,
+      dev: false,
+      dir: process.cwd(),
+      config: {},
+    } as never);
+    expect(defines['self.__SERWIST_SW_ENTRY.reloadOnOnline']).toBe('false');
+  });
+});
